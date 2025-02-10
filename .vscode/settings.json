@@ -1,0 +1,7 @@
+{
+    "zenMode.hideStatusBar": true,
+    "zenMode.hideLineNumbers": true,
+    "zenMode.hideActivityBar": true,
+    "debug.hideLauncherWhileDebugging": true,
+    "zenMode.fullScreen": false
+}
