@@ -350,7 +350,7 @@ const Home: React.FC = () => {
       newDate.setMinutes(tanggal.getMinutes());
       setTanggal(newDate);
     }
-  
+
   };
   const onChange1 = (event: any, selectedDate: any) => {
     if (waktu && event.type === 'set') {
@@ -374,7 +374,6 @@ const Home: React.FC = () => {
       is24Hour: true,
     });
   };
-  
 
   const handleChangeWaktu = () => {
     if (!selectedTugas) return;
@@ -389,7 +388,7 @@ const Home: React.FC = () => {
       is24Hour: true,
     });
   };
-  
+
   const handlePrioritas = async (item: Tugas) => {
     const updatedTugas = [...tugas];
     const index = updatedTugas.findIndex((t) => t.id === item.id);
@@ -421,7 +420,12 @@ const Home: React.FC = () => {
       Alert.alert("Error", "Gagal menghapus sub-tugas.");
     }
   };
-  
+
+  const handleBatalDeadline = () => {
+    setIsVisible(false)
+    setSelectedTugas(null);
+  }
+
   //UI/Tampilan
   return (
     <View style={styles.container}>
@@ -597,6 +601,7 @@ const Home: React.FC = () => {
                               <TouchableOpacity style={{
                                 padding: 7
                               }}
+                              onPress={handleBatalDeadline}
                               >
                                 <Text>Batal</Text>
                               </TouchableOpacity>

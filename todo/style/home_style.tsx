@@ -76,7 +76,6 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 15,
     width: '90%',
-    maxHeight: '50%',
   },
   modalContentTanggal: {
     backgroundColor: '#fff',
