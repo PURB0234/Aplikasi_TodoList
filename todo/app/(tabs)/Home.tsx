@@ -11,7 +11,6 @@ import {
   Platform,
   Image,
 } from 'react-native';
-import { initializeApp } from 'firebase/app';
 import {
   getFirestore,
   collection,
@@ -28,14 +27,13 @@ import {
   deleteField,
 } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
-import { getAuth, signOut } from 'firebase/auth';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '@/style/home_style';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { db } from '@/service/firebaseConfig'
 import TugasComponent from '@/components/Tugas';
-//import { handleHapusDeadline, handleBatalDeadline, handleSimpanDeadline } from '@/controllers/deadlineCrontrol';
+import { handleHapusDeadline, handleSimpanDeadline } from '@/controllers/deadlineCrontrol';
 
 type Tugas = {
   [x: string]: unknown;
@@ -392,8 +390,6 @@ const Home: React.FC = () => {
     });
   };
   
-
-
   const handlePrioritas = async (item: Tugas) => {
     const updatedTugas = [...tugas];
     const index = updatedTugas.findIndex((t) => t.id === item.id);
@@ -425,46 +421,6 @@ const Home: React.FC = () => {
       Alert.alert("Error", "Gagal menghapus sub-tugas.");
     }
   };
-
-  const handleSimpanDeadline = async () => {
-    if (!selectedTugas) return;
-    const combinedDateTime = new Date(
-      tanggal.getFullYear(),
-      tanggal.getMonth(),
-      tanggal.getDate(),
-      waktu.getHours(),
-      waktu.getMinutes()
-    );
-    try {
-      const tugasDocRef = doc(db, 'tdl', selectedTugas.id);
-      await updateDoc(tugasDocRef, { deadline: combinedDateTime.toISOString() });
-      setSelectedTugas({ ...selectedTugas, deadline: combinedDateTime.toISOString() });
-      setIsVisible(false); // Close deadline modal
-      Alert.alert('Sukses', 'Deadline berhasil disimpan');
-    } catch (error) {
-      console.error('Error menyimpan deadline:', error);
-      Alert.alert('Error', 'Gagal menyimpan deadline');
-    }
-  };
-  
-  const handleHapusDeadline = async () => {
-    if (!selectedTugas) return;
-    try {
-      const tugasDocRef = doc(db, "tdl", selectedTugas.id);
-      await updateDoc(tugasDocRef, {
-        deadline: deleteField(),
-      });
-      setSelectedTugas((prevTugas) => 
-        prevTugas ? { ...prevTugas, deadline: null } : null
-      );
-      setIsVisible(false); 
-      Alert.alert("Sukses", "Deadline berhasil dihapus!");
-    } catch (error) {
-      console.error("Error menghapus deadline:", error);
-      Alert.alert("Error", "Gagal menghapus deadline!");
-    }
-  };
-  
   
   //UI/Tampilan
   return (
@@ -649,14 +605,14 @@ const Home: React.FC = () => {
                                 padding: 7,
                                 borderRadius: 15
                               }}
-                                onPress={handleSimpanDeadline}
+                                onPress={() => handleSimpanDeadline(selectedTugas, tanggal, waktu, (tugas) => setSelectedTugas(null), setIsVisible)}
                               >
                                 <Text>Simpan</Text>
                               </TouchableOpacity>
                             </View>
                             <View style={{ justifyContent: 'center', width: '100%', height: 'auto', marginTop: 20 }}>
                               <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', padding: 5 }}
-                                onPress={handleHapusDeadline}
+                                onPress={() => handleHapusDeadline(selectedTugas, (tugas) => setSelectedTugas(null), setIsVisible)}
                               >
                                 <Text style={{ color: 'rgb(31, 142, 211)' }}>Hapus Deadline</Text>
                               </TouchableOpacity>
