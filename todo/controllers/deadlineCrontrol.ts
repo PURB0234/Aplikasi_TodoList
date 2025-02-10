@@ -32,18 +32,6 @@ interface Tugas {
     }
   };
   
-  // **Batal Deadline**
-  export const handleBatalDeadline = (
-    selectedEdit: Tugas | null,
-    previousDeadline: string | null,
-    setSelectedEdit: (tugas: Tugas | null) => void
-  ) => {
-    if (!selectedEdit) return;
-  
-    setSelectedEdit({ ...selectedEdit, deadline: previousDeadline });
-    Alert.alert("Info", "Perubahan deadline dibatalkan.");
-  };
-  
   // **Hapus Deadline**
   export const handleHapusDeadline = async (
     selectedEdit: Tugas | null,

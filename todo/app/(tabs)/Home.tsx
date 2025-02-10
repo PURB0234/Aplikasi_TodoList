@@ -24,6 +24,8 @@ import {
   addDoc,
   getDoc,
   setDoc,
+  FieldValue,
+  deleteField,
 } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import { getAuth, signOut } from 'firebase/auth';
@@ -33,7 +35,7 @@ import styles from '@/style/home_style';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { db } from '@/service/firebaseConfig'
 import TugasComponent from '@/components/Tugas';
-import { handleHapusDeadline, handleBatalDeadline, handleSimpanDeadline } from '@/controllers/deadlineCrontrol';
+//import { handleHapusDeadline, handleBatalDeadline, handleSimpanDeadline } from '@/controllers/deadlineCrontrol';
 
 type Tugas = {
   [x: string]: unknown;
@@ -42,7 +44,7 @@ type Tugas = {
   subTugas: any[];
   prioritas: boolean;
   createdAt: string;
-  deadline?: string;
+  deadline: string | null | undefined;
 };
 
 const Home: React.FC = () => {
@@ -74,7 +76,6 @@ const Home: React.FC = () => {
   const [isTerlambat, setIsTerlambat] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [selectedDeadline, setSelectedDeadline] = useState(false);
-  const [tanggalDeadline, setTanggalDeadline] = useState('');
 
 
 
@@ -345,79 +346,52 @@ const Home: React.FC = () => {
   };
 
   const onChange = (event: any, selectedDate: any) => {
-    if (selectedDate) {
-      setTanggal(selectedDate);
-      setTampil(!tampil);
+    if (tanggal && event.type === 'set') {
+      const newDate = new Date(tanggal);
+      newDate.setHours(tanggal.getHours());
+      newDate.setMinutes(tanggal.getMinutes());
+      setTanggal(newDate);
     }
+  
   };
   const onChange1 = (event: any, selectedDate: any) => {
-    if (selectedDate) {
-      setTanggal(selectedDate);
-      setTampil(!tampil);
+    if (waktu && event.type === 'set') {
+      const newTime = new Date(selectedDate);
+      newTime.setHours(waktu.getHours());
+      newTime.setMinutes(waktu.getMinutes());
+      setWaktu(newTime);
     }
   };
 
   const handleChangeTanggal = () => {
     if (!selectedTugas) return;
-
     DateTimePickerAndroid.open({
       value: tanggal,
       onChange: (event, selectedDate) => {
         if (selectedDate) {
           setTanggal(selectedDate);
-          const deadline = selectedDate.getTime();
-          const now = new Date().getTime();
-
-          if (deadline < now) {
-            setIsTerlambat(true);
-          } else {
-            setIsTerlambat(false);
-          }
-
-          try {
-            const tugasDocRef = doc(db, 'tdl', selectedTugas.id);
-            updateDoc(tugasDocRef, { deadline: selectedDate.toISOString() });
-            setSelectedTugas({ ...selectedTugas, deadline: selectedDate.toISOString() });
-          } catch (error) {
-            console.error('Error updating deadline:', error);
-          }
         }
       },
       mode: 'date',
       is24Hour: true,
     });
   };
+  
 
   const handleChangeWaktu = () => {
     if (!selectedTugas) return;
-
     DateTimePickerAndroid.open({
       value: waktu,
       onChange: (event, selectedTime) => {
         if (selectedTime) {
           setWaktu(selectedTime);
-          const deadline = selectedTime.getTime();
-          const now = new Date().getTime();
-
-          if (deadline < now) {
-            setIsTerlambat(true);
-          } else {
-            setIsTerlambat(false);
-          }
-
-          try {
-            const tugasDocRef = doc(db, 'tdl', selectedTugas.id);
-            updateDoc(tugasDocRef, { deadline: selectedTime.toISOString() });
-            setSelectedTugas({ ...selectedTugas, deadline: selectedTime.toISOString() });
-          } catch (error) {
-            console.error('Error updating deadline:', error);
-          }
         }
       },
       mode: 'time',
       is24Hour: true,
     });
   };
+  
 
 
   const handlePrioritas = async (item: Tugas) => {
@@ -452,7 +426,46 @@ const Home: React.FC = () => {
     }
   };
 
-
+  const handleSimpanDeadline = async () => {
+    if (!selectedTugas) return;
+    const combinedDateTime = new Date(
+      tanggal.getFullYear(),
+      tanggal.getMonth(),
+      tanggal.getDate(),
+      waktu.getHours(),
+      waktu.getMinutes()
+    );
+    try {
+      const tugasDocRef = doc(db, 'tdl', selectedTugas.id);
+      await updateDoc(tugasDocRef, { deadline: combinedDateTime.toISOString() });
+      setSelectedTugas({ ...selectedTugas, deadline: combinedDateTime.toISOString() });
+      setIsVisible(false); // Close deadline modal
+      Alert.alert('Sukses', 'Deadline berhasil disimpan');
+    } catch (error) {
+      console.error('Error menyimpan deadline:', error);
+      Alert.alert('Error', 'Gagal menyimpan deadline');
+    }
+  };
+  
+  const handleHapusDeadline = async () => {
+    if (!selectedTugas) return;
+    try {
+      const tugasDocRef = doc(db, "tdl", selectedTugas.id);
+      await updateDoc(tugasDocRef, {
+        deadline: deleteField(),
+      });
+      setSelectedTugas((prevTugas) => 
+        prevTugas ? { ...prevTugas, deadline: null } : null
+      );
+      setIsVisible(false); 
+      Alert.alert("Sukses", "Deadline berhasil dihapus!");
+    } catch (error) {
+      console.error("Error menghapus deadline:", error);
+      Alert.alert("Error", "Gagal menghapus deadline!");
+    }
+  };
+  
+  
   //UI/Tampilan
   return (
     <View style={styles.container}>
@@ -628,7 +641,6 @@ const Home: React.FC = () => {
                               <TouchableOpacity style={{
                                 padding: 7
                               }}
-                                onPress={(event) => handleBatalDeadline}
                               >
                                 <Text>Batal</Text>
                               </TouchableOpacity>
@@ -637,14 +649,14 @@ const Home: React.FC = () => {
                                 padding: 7,
                                 borderRadius: 15
                               }}
-                                onPress={(event) => handleSimpanDeadline}
+                                onPress={handleSimpanDeadline}
                               >
                                 <Text>Simpan</Text>
                               </TouchableOpacity>
                             </View>
                             <View style={{ justifyContent: 'center', width: '100%', height: 'auto', marginTop: 20 }}>
                               <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', padding: 5 }}
-                                onPress={(event) => handleHapusDeadline}
+                                onPress={handleHapusDeadline}
                               >
                                 <Text style={{ color: 'rgb(31, 142, 211)' }}>Hapus Deadline</Text>
                               </TouchableOpacity>

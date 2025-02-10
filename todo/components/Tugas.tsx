@@ -17,7 +17,7 @@ type Tugas = {
   subTugas: SubTugas[];
   prioritas: boolean;
   createdAt: string;
-  deadline?: string;
+  deadline: string | null | undefined;
 };
 
 type SubTugas = {
