@@ -14,6 +14,8 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db } from '@/service/firebaseConfig'
+import styles from '@/style/addTask_style';
+import { handleTambahTugas, handleTambahSubTugas } from '@/controllers/addTask';
 
 // const firebaseConfig = {
 //   apiKey: 'AIzaSyBKGfv19cLXQSzCpRCMBdWMjIObZ1E8udA',
@@ -38,50 +40,6 @@ const Tambah: React.FC = () => {
   const [subTugas, setSubTugas] = useState<string>('');
   const [subTugasList, setSubTugasList] = useState<SubTugas[]>([]);
   const router = useRouter();
-   const handleTambahSubTugas = (): void => {
-     if (!subTugas.trim()) {
-       Alert.alert('Error', 'Sub-tugas tidak boleh kosong!');
-       return;
-     }
-     setSubTugasList([...subTugasList, { text: subTugas, completed: false }]);
-     setSubTugas('');
-   };
-
-  interface TugasData {
-    judulTugas: string;
-    subTugas: SubTugas[];
-    userId: string;
-    createdAt: Date;
-  }
-
-  const handleTambahData = async (): Promise<void> => {
-    if (!judulTugas.trim() || subTugasList.length === 0) {
-      Alert.alert('Error', 'Harap isi semua kolom dan tambahkan sub-tugas!');
-      return;
-    }
-
-    try {
-      const userId = await AsyncStorage.getItem('userId');
-      if (!userId) {
-        Alert.alert('Error', 'User tidak ditemukan!');
-        return;
-      }
-      const newTugas: TugasData = {
-        judulTugas,
-        subTugas: subTugasList,
-        userId,
-        createdAt: new Date(),
-      };
-      await addDoc(collection(db, 'tdl'), newTugas);
-      router.push('/(tabs)/Home');
-      Alert.alert('Sukses', 'Data tugas berhasil ditambahkan!');
-      setJudulTugas('');
-      setSubTugasList([]);
-    } catch (e) {
-      console.error('Error adding document: ', e);
-      Alert.alert('Error', 'Gagal menambahkan data tugas!');
-    }
-  };
 
   const handleHapusSubTugas = (index: number) => {
     const updatedList = [...subTugasList];
@@ -91,14 +49,13 @@ const Tambah: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* <Text style={styles.title}>Tambah Tugas</Text> */}
       <View style={{
         width: '100%',
         marginBottom: 30,
         marginTop: 35
       }}>
         <TouchableOpacity onPress={() => router.push('/(tabs)/Home')}>
-          <Ionicons name='arrow-back' size={23} color={'#00000'}/>
+          <Ionicons name='arrow-back' size={23} color={'#00000'} />
         </TouchableOpacity>
       </View>
       <TextInput
@@ -115,8 +72,8 @@ const Tambah: React.FC = () => {
           value={subTugas}
           onChangeText={setSubTugas}
         />
-        <TouchableOpacity style={styles.addButton} onPress={handleTambahSubTugas} >
-          <Ionicons name="add" color="#00000" size={23}/>
+        <TouchableOpacity style={styles.addButton} onPress={() => handleTambahSubTugas(subTugas, subTugasList, setSubTugasList, setSubTugas)} >
+          <Ionicons name="add" color="#00000" size={23} />
         </TouchableOpacity>
       </View>
 
@@ -125,33 +82,23 @@ const Tambah: React.FC = () => {
         keyExtractor={(_, index) => index.toString()}
         renderItem={({ item, index }) => (
           <View style={styles.subTugasItem}>
-            {/* <TouchableOpacity onPress={() => toggleComplete(index)}>
-              <Ionicons
-                name={item.completed ? 'checkbox' : 'square-outline'}
-                size={24}
-                color={item.completed ? 'green' : 'gray'}
-                style={{
-                  marginStart: 5
-                }}
-              />
-            </TouchableOpacity> */}
             <Text
               style={styles.subTugasText}
             >
               {item.text}
             </Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={{
                 marginEnd: 10
               }}
               onPress={() => handleHapusSubTugas(index)}
             >
-              <Ionicons name='close-outline' size={24} color={'black'}/>
+              <Ionicons name='close-outline' size={24} color={'black'} />
             </TouchableOpacity>
           </View>
         )}
       />
-      <TouchableOpacity style={styles.button} onPress={handleTambahData}>
+      <TouchableOpacity style={styles.button} onPress={() => handleTambahTugas(judulTugas, subTugasList, setJudulTugas, setSubTugasList, router)}>
         <Text style={styles.buttonText}>Tambah</Text>
       </TouchableOpacity>
     </View>
@@ -159,64 +106,3 @@ const Tambah: React.FC = () => {
 };
 
 export default Tambah;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#f8f9fa',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    marginTop: 30
-  },
-  input: {
-    width: '100%',
-    padding: 10,
-    marginBottom: 10,
-    fontSize: 25
-  },
-  subTugasContainer: {
-    flexDirection: 'row',
-    width: '100%',
-    marginBottom: 10,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  inputSubTugas: {
-    flex: 1,
-    padding: 10,
-  },
-  addButton: {
-    marginLeft: 5,
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  button: {
-    width: '100%',
-    padding: 10,
-    backgroundColor: 'skyblue',
-    borderRadius: 5,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  subTugasItem: {
-    flexDirection: 'row',
-    marginBottom: 10,
-    width: '100%',
-    marginTop: 15
-  },
-  subTugasText: {
-    marginLeft: 10,
-    fontSize: 16,
-    flex: 1
-  },
-});

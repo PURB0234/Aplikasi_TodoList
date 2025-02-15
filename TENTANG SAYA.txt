@@ -1,3 +1,4 @@
 NAMA    : Purbo Jatmiko
 KELAS   : XII RPL 1
 JURUSAN : Rekayasa Perangkat Lunak
+Tujuan	: Untuk memenuhi syarat kelulusan sekolah
