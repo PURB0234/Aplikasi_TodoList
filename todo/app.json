@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "perpus",
+    "name": "TodoList",
     "slug": "perpus",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.perpus"
+      "package": "com.anonymous.perpus",
+      "useNextNotificationsApi": true
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +38,15 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "owner": "purbojatmiko",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "34e73cc5-d105-4547-afbf-bec1784f4dfa"
+      }
     }
   }
 }

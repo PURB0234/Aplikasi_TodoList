@@ -67,7 +67,7 @@ const TugasComponent: React.FC<TugasProps> = ({
       />
       {item.deadline && new Date(item.deadline).getTime() <= new Date().getTime() &&
         !item.subTugas.every((sub) => sub.completed) && (
-          <Text style={{ color: 'red' }}>Terlambat diselesaikan!!!</Text>
+          <Text style={{ color: 'red' }}>Belum Selesai!!!</Text>
         )}
 
       {item.subTugas.every((sub) => sub.completed) && (
@@ -100,7 +100,7 @@ const TugasComponent: React.FC<TugasProps> = ({
               fontSize: 18,
               fontWeight: 'bold',
               marginBottom: 5,
-              marginTop: 25
+              marginTop: 25,
             }}>Tugas Lainya</Text>
           </View>
         )}
@@ -129,7 +129,6 @@ const TugasComponent: React.FC<TugasProps> = ({
           )
         }
       />
-      
     </View>
   );
 };

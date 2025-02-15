@@ -34,6 +34,8 @@ import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/d
 import { db } from '@/service/firebaseConfig'
 import TugasComponent from '@/components/Tugas';
 import { handleHapusDeadline, handleSimpanDeadline } from '@/controllers/deadlineCrontrol';
+import { requestNotificationPermission, setupNotificationListener } from '@/controllers/notifikasi';
+
 
 type Tugas = {
   [x: string]: unknown;
@@ -75,7 +77,10 @@ const Home: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedDeadline, setSelectedDeadline] = useState(false);
 
-
+  useEffect(() => {
+    requestNotificationPermission();
+    setupNotificationListener();
+  }, []);
 
   interface TugasData {
     subTugas: SubTugas[];
@@ -424,18 +429,13 @@ const Home: React.FC = () => {
   const handleBatalDeadline = () => {
     setIsVisible(false)
     setSelectedTugas(null);
-  }
+  };
 
   //UI/Tampilan
   return (
     <View style={styles.container}>
       <View style={styles.searchContainer}>
-        <TouchableOpacity style={{
-          justifyContent: 'center',
-          marginTop: 20,
-          padding: 5,
-          marginEnd: 10,
-        }} onPress={handleOpenSwitchAkun}>
+        <TouchableOpacity style={styles.buttonSwitch} onPress={handleOpenSwitchAkun}>
           <Ionicons name='person-circle' size={30} color={'black'} />
         </TouchableOpacity>
         {selectedSwitch && (
@@ -445,31 +445,12 @@ const Home: React.FC = () => {
             transparent={true}
             onRequestClose={handleCloseSwitchAkun}
           >
-            <View style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100%',
-              height: '100%'
-            }}>
-              <View style={{
-                backgroundColor: '#fff',
-                width: '100%',
-                height: '100%'
-              }}>
-                <View style={{
-                  padding: 20,
-                  flexDirection: 'column'
-                }}>
-                  <View style={{
-                    width: '100%',
-                    flexDirection: 'row',
-                  }}>
+            <View style={styles.v1}>
+              <View style={styles.v2}>
+                <View style={styles.v3}>
+                  <View style={styles.v4}>
                     <Ionicons name='person-circle' size={42} color={'#00000'} />
-                    <View style={{
-                      flexDirection: 'column',
-                      marginStart: 10,
-                    }}>
+                    <View style={styles.v5}>
                       <Text style={{
                         fontSize: 15,
                         fontWeight: 'bold'
@@ -480,24 +461,12 @@ const Home: React.FC = () => {
                       alignItems: 'flex-end',
                       width: '50%',
                     }}>
-                      <TouchableOpacity style={{
-                        marginRight: 20,
-                        marginLeft: 20,
-                        alignItems: 'flex-end',
-                        padding: 5
-                      }} onPress={Logout}>
+                      <TouchableOpacity style={styles.buttonLogout} onPress={Logout}>
                         <Ionicons name='log-out-outline' size={25} color={'#00000'} />
                       </TouchableOpacity>
                     </View>
                   </View>
-                  <View style={{
-                    height: 2,
-                    borderWidth: 0,
-                    marginVertical: 1,
-                    borderColor: '#ccc',
-                    backgroundColor: 'black',
-                    marginTop: 5
-                  }}>
+                  <View style={styles.v6}>
                   </View>
                 </View>
               </View>
@@ -549,15 +518,17 @@ const Home: React.FC = () => {
                             alignItems: 'center',
                           }}>
                             <Text style={{ fontWeight: 'bold' }}>
-                              Tambahkan Deadline
+                              Tambahkan Pengingat
                             </Text>
                           </View>
                           <View style={{
-                            width: '100%',
+                            width: '70%',
                             flexDirection: 'row',
                             justifyContent: 'space-between',
                             height: 'auto',
                             alignItems: 'flex-start',
+                            marginStart: 20,
+                            marginEnd: 20
                           }}>
                             {Platform.OS !== 'android' ? (
                               <DateTimePicker
@@ -569,7 +540,7 @@ const Home: React.FC = () => {
                             ) : (
                               <TouchableOpacity
                                 onPress={handleChangeTanggal}
-                                style={styles.buttonTime}
+                                style={[styles.buttonTime]}
                               >
                                 <Ionicons name='calendar' size={21} color={'white'} />
                               </TouchableOpacity>
@@ -601,7 +572,7 @@ const Home: React.FC = () => {
                               <TouchableOpacity style={{
                                 padding: 7
                               }}
-                              onPress={handleBatalDeadline}
+                                onPress={handleBatalDeadline}
                               >
                                 <Text>Batal</Text>
                               </TouchableOpacity>
@@ -629,19 +600,11 @@ const Home: React.FC = () => {
                   </Modal>
                 )}
                 <TouchableOpacity onPress={handleOpenDeadline}>
-                  <Ionicons name='calendar' size={21} color={'black'} />
+                  <Ionicons name='notifications' size={21} color={'black'} />
                 </TouchableOpacity>
 
                 {/* prioritas */}
-                <TouchableOpacity style={{
-                  width: 25,
-                  height: 25,
-                  borderRadius: 12.1,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginStart: 10,
-                  marginEnd: 10,
-                }} onPress={() => handlePrioritas(selectedTugas)}>
+                <TouchableOpacity style={styles.buttonPriority} onPress={() => handlePrioritas(selectedTugas)}>
                   {selectedTugas.prioritas ? (
                     <Ionicons name="star" size={21} color={'gold'} />
                   ) : (
@@ -650,13 +613,7 @@ const Home: React.FC = () => {
                 </TouchableOpacity>
 
                 {/* edit tugas/button */}
-                <TouchableOpacity style={{
-                  width: 25,
-                  height: 25,
-                  borderRadius: 12.1,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }} onPress={() => handleOpenEditTugas(selectedTugas)}>
+                <TouchableOpacity style={styles.buttonEdit} onPress={() => handleOpenEditTugas(selectedTugas)}>
                   <Ionicons name='pencil-sharp' color={'black'} size={21} />
                 </TouchableOpacity>
               </View>

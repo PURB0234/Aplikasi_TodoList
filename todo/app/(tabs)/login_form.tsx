@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
-import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
+import React, { useState } from 'react';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { db } from '@/service/firebaseConfig'
 import styles from '@/style/signIn_style';
+import { loginControl } from '@/controllers/loginControl';
 
 // const db = getFirestore();
 
@@ -15,45 +13,46 @@ const Login: React.FC = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
-  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  // const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleSignIn = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Input Error', 'Harap isi email dan password.');
-      return;
-    }
 
-    if (!validateEmail(email)) {
-      Alert.alert('Invalid Email', 'Harap masukkan alamat email yang valid.');
-      return;
-    }
+  // const handleSignIn = async () => {
+  //   if (!email.trim() || !password.trim()) {
+  //     Alert.alert('Input Error', 'Harap isi email dan password.');
+  //     return;
+  //   }
 
-    try {
-      const userQuery = query(collection(db, 'users'), where('email', '==', email));
-      const querySnapshot = await getDocs(userQuery);
+  //   if (!validateEmail(email)) {
+  //     Alert.alert('Invalid Email', 'Harap masukkan alamat email yang valid.');
+  //     return;
+  //   }
 
-      if (querySnapshot.empty) {
-        Alert.alert('Error', 'Email tidak terdaftar.');
-        return;
-      }
+  //   try {
+  //     const userQuery = query(collection(db, 'users'), where('email', '==', email));
+  //     const querySnapshot = await getDocs(userQuery);
 
-      querySnapshot.forEach(async (doc) => {
-        const userData = doc.data();
-        if (userData.password === password) {
-          await AsyncStorage.setItem('userId', doc.id);
-          const storedUserId = await AsyncStorage.getItem('userId')
-          console.log('User ID setelah login:', storedUserId)
-          router.replace('/(tabs)/Home');
-          Alert.alert('Success', 'Login berhasil!');
-        } else {
-          Alert.alert('Error', 'Password salah.');
-        }
-      });
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      Alert.alert('Error', 'Failed to sign in.');
-    }
-  };
+  //     if (querySnapshot.empty) {
+  //       Alert.alert('Error', 'Email tidak terdaftar.');
+  //       return;
+  //     }
+
+  //     querySnapshot.forEach(async (doc) => {
+  //       const userData = doc.data();
+  //       if (userData.password === password) {
+  //         await AsyncStorage.setItem('userId', doc.id);
+  //         const storedUserId = await AsyncStorage.getItem('userId')
+  //         console.log('User ID setelah login:', storedUserId)
+  //         router.replace('/(tabs)/Home');
+  //         Alert.alert('Success', 'Login berhasil!');
+  //       } else {
+  //         Alert.alert('Error', 'Password salah.');
+  //       }
+  //     });
+  //   } catch (error) {
+  //     console.error('Error fetching user data:', error);
+  //     Alert.alert('Error', 'Failed to sign in.');
+  //   }
+  // };
 
 
   return (
@@ -70,7 +69,7 @@ const Login: React.FC = () => {
             <Ionicons name={showPassword ? 'eye' : 'eye-off'} size={17} color="black" />
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.button} onPress={handleSignIn}>
+        <TouchableOpacity style={styles.button} onPress={() => loginControl(email, password)}>
           <Text style={styles.buttonText}>Sign In</Text>
         </TouchableOpacity>
         <View style={styles.switchContainer}>

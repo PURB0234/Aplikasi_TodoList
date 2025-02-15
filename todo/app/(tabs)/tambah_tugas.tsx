@@ -47,12 +47,6 @@ const Tambah: React.FC = () => {
      setSubTugas('');
    };
 
-  const toggleComplete = (index: number): void => {
-    const updatedList = [...subTugasList];
-    updatedList[index].completed = !updatedList[index].completed;
-    setSubTugasList(updatedList);
-  };
-
   interface TugasData {
     judulTugas: string;
     subTugas: SubTugas[];
